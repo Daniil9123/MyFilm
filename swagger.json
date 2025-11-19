@@ -1,0 +1,179 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "MyFilm API",
+    "version": "1.0.0",
+    "description": "REST API for films and session-based auth (login/logout)."
+  },
+  "servers": [
+    { "url": "http://localhost:3000", "description": "Local" }
+  ],
+  "paths": {
+    "/login": {
+      "post": {
+        "summary": "Login (sets session cookie)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "example": "admin@myshop.local" },
+                  "password": { "type": "string", "example": "123" }
+                },
+                "required": ["email", "password"]
+              }
+            },
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "example": "admin@myshop.local" },
+                  "password": { "type": "string", "example": "123" }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": { "description": "Redirect on success" },
+          "200": { "description": "May return HTML if used via browser" }
+        }
+      }
+    },
+
+    "/logout": {
+      "post": {
+        "summary": "Logout (clears session cookie)",
+        "responses": { "302": { "description": "Redirect to home" } }
+      }
+    },
+
+    "/api/films": {
+      "get": {
+        "summary": "List films",
+        "responses": {
+          "200": {
+            "description": "Array of films",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Film" } }
+              }
+            }
+          }
+        }
+      },
+
+      "post": {
+        "summary": "Create film (admin only)",
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/FilmInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Film" } } }
+          },
+          "403": { "description": "Forbidden" }
+        }
+      }
+    },
+
+    "/api/films/{id}": {
+      "get": {
+        "summary": "Get a film",
+        "parameters": [
+          { "in": "path", "name": "id", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Film" } } }
+          },
+          "404": { "description": "Not found" }
+        }
+      },
+
+      "put": {
+        "summary": "Update film (admin only)",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "in": "path", "name": "id", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/FilmInput" } }
+          }
+        },
+        "responses": {
+          "200": { "description": "OK" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found" }
+        }
+      },
+
+      "delete": {
+        "summary": "Delete film (admin only)",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "in": "path", "name": "id", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "204": { "description": "Deleted" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Not found" }
+        }
+      }
+    }
+  },
+
+  "components": {
+    "securitySchemes": {
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "connect.sid",
+        "description": "Session cookie after /login."
+      }
+    },
+
+    "schemas": {
+      "Film": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "desc": { "type": "string" },
+          "price": { "type": "number", "format": "float" },
+          "pic": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+
+      "FilmInput": {
+        "type": "object",
+        "required": ["name", "desc", "price"],
+        "properties": {
+          "name": { "type": "string", "example": "Demo Film" },
+          "desc": { "type": "string", "example": "Sample description" },
+          "price": { "type": "number", "example": 10.99 },
+          "pic": {
+            "type": "string",
+            "example": "https://www.hi-fi.ru/upload/iblock/8e4/8e44111e0794046848239ece96cecaad.jpg",
+            "description": "Image URL or app-relative path. Defaults to https://www.hi-fi.ru/upload/iblock/8e4/8e44111e0794046848239ece96cecaad.jpg"
+          }
+        }
+      }
+    }
+  }
+}

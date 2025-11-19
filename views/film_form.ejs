@@ -1,0 +1,51 @@
+<%- include('partials/header', { title: (film ? 'Edit Film' : 'New Film') }) %>
+
+<h1 class="h4 mb-3"><%= film ? 'Edit Film' : 'New Film' %></h1>
+
+<form method="post" action="<%= film ? ('/films/' + film.id) : '/films' %>">
+  <div class="row g-3">
+    <div class="col-12">
+      <label class="form-label" for="name">Name</label>
+      <input class="form-control" id="name" name="name" required value="<%= film ? film.name : '' %>" />
+    </div>
+    <div class="col-12">
+      <label class="form-label" for="desc">Description</label>
+      <textarea class="form-control" id="desc" name="desc" rows="4" required><%= film ? film.desc : '' %></textarea>
+    </div>
+    <div class="col-6 col-sm-4">
+      <label class="form-label" for="price">Price</label>
+      <input class="form-control" id="price" name="price" type="number" min="0" step="0.01" required value="<%= film ? film.price : '' %>" />
+    </div>
+    <div class="col-6 col-sm-4">
+      <label class="form-label" for="createdAt">Created At</label>
+      <input class="form-control" id="createdAt" name="createdAt" type="datetime-local" required value="<%= film ? new Date(film.createdAt).toISOString().slice(0,16) : new Date().toISOString().slice(0,16) %>" />
+    </div>
+    <div class="col-12">
+      <label class="form-label" for="pic">Picture URL or path</label>
+      <!-- Текстовое поле для адреса картинки. По умолчанию https://www.hi-fi.ru/upload/iblock/8e4/8e44111e0794046848239ece96cecaad.jpg -->
+      <input class="form-control" id="pic" name="pic" placeholder="https://www.hi-fi.ru/upload/iblock/8e4/8e44111e0794046848239ece96cecaad.jpg or https://..." value="<%= film ? film.pic : 'https://www.hi-fi.ru/upload/iblock/8e4/8e44111e0794046848239ece96cecaad.jpg' %>" />
+      <div class="form-text">Stored as address in DB. Use absolute URL or app-relative path.</div>
+      <!-- Превью картинки для удобства администратора -->
+      <div class="d-flex align-items-center gap-3 mt-2">
+        <img id="picPreview" src="<%= film ? film.pic : 'https://www.hi-fi.ru/upload/iblock/8e4/8e44111e0794046848239ece96cecaad.jpg' %>" width="80" height="80" class="rounded object-fit-cover border" alt="pic" />
+        <span class="text-muted small">Preview</span>
+      </div>
+    </div>
+  </div>
+  <div class="mt-3 d-flex gap-2">
+    <button class="btn btn-primary" type="submit">Save</button>
+    <a class="btn btn-outline-secondary" href="/">Cancel</a>
+  </div>
+</form>
+<script>
+  // Обновляем превью при вводе адреса картинки
+  const picInput = document.getElementById('pic');
+  const picPreview = document.getElementById('picPreview');
+  if (picInput && picPreview) {
+    picInput.addEventListener('input', () => {
+      const v = picInput.value && picInput.value.trim() ? picInput.value.trim() : 'https://www.hi-fi.ru/upload/iblock/8e4/8e44111e0794046848239ece96cecaad.jpg';
+      picPreview.src = v;
+    });
+  }
+</script>
+<%- include('partials/footer') %>
